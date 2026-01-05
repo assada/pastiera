@@ -1,0 +1,88 @@
+name: 🍰 Build Release APK
+
+on:
+  push:
+    branches:
+      - master
+      - staging
+
+env:
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'temurin'
+
+jobs:
+  build:
+    name: 🔨 Build & Sign APK
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: ☕ Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          cache: gradle
+          
+      - name: 🔐 Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ${{ github.workspace }}/release-keystore.jks
+          
+      - name: 📋 Extract version info
+        id: version
+        run: |
+          VERSION_NAME=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          VERSION_CODE=$(grep -oP 'versionCode = \K\d+' app/build.gradle.kts)
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "📦 Version: $VERSION_NAME (code: $VERSION_CODE)"
+          
+      - name: 🛠️ Grant execute permission for gradlew
+        run: chmod +x gradlew
+        
+      - name: 🏗️ Build Release APK
+        env:
+          PASTIERA_KEYSTORE_PATH: ${{ github.workspace }}/release-keystore.jks
+          PASTIERA_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          PASTIERA_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          PASTIERA_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+        
+      - name: 🧹 Clean up keystore
+        if: always()
+        run: rm -f ${{ github.workspace }}/release-keystore.jks
+        
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pastiera-${{ steps.version.outputs.version_name }}-${{ github.ref_name }}-${{ github.run_number }}
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 30
+          
+      - name: 🏷️ Create Release (master only)
+        if: github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version_name }}-${{ github.run_number }}
+          name: 🍰 Pastiera v${{ steps.version.outputs.version_name }}
+          body: |
+            ## 🍰 Pastiera Keyboard Release
+            
+            **Version:** ${{ steps.version.outputs.version_name }}
+            **Version Code:** ${{ steps.version.outputs.version_code }}
+            **Build:** #${{ github.run_number }}
+            **Commit:** ${{ github.sha }}
+            
+            ### 📥 Download
+            Download the APK below and install it on your Android device.
+            
+            ---
+            *Built automatically from `master` branch*
+          files: app/build/outputs/apk/release/*.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
