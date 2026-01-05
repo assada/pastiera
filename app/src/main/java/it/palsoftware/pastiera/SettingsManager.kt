@@ -52,8 +52,8 @@ object SettingsManager {
     private const val KEY_CLIPBOARD_RETENTION_TIME = "clipboard_retention_time" // How long to keep clipboard entries (in minutes)
     private const val KEY_TRACKPAD_GESTURES_ENABLED = "trackpad_gestures_enabled" // Whether trackpad gesture suggestions are enabled
     private const val KEY_TRACKPAD_SWIPE_THRESHOLD = "trackpad_swipe_threshold" // Threshold for swipe detection on trackpad
-    private const val KEY_SHOW_VOICE_INPUT_BUTTON = "show_voice_input_button" // Whether to show the voice input microphone button
     private const val KEY_DISABLE_ACCENTED_LETTERS = "disable_accented_letters" // Whether to hide accented letter variations
+    private const val KEY_SHOW_VOICE_INPUT_BUTTON = "show_voice_input_button" // Whether to show the voice input microphone button
 
     private const val VARIATIONS_FILE_NAME = "variations.json"
     
@@ -96,8 +96,8 @@ object SettingsManager {
     private const val DEFAULT_TRACKPAD_SWIPE_THRESHOLD = 300f
     private const val MIN_TRACKPAD_SWIPE_THRESHOLD = 120f
     private const val MAX_TRACKPAD_SWIPE_THRESHOLD = 600f
-    private const val DEFAULT_SHOW_VOICE_INPUT_BUTTON = true
     private const val DEFAULT_DISABLE_ACCENTED_LETTERS = false
+    private const val DEFAULT_SHOW_VOICE_INPUT_BUTTON = true
 
     /**
      * Returns the SharedPreferences instance for Pastiera.
