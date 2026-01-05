@@ -42,5 +42,10 @@
         android:imeSubtypeLocale="ru_RU"
         android:imeSubtypeMode="keyboard"
         android:imeSubtypeExtraValue="noSuggestions=true" />
+    <subtype
+        android:label="@string/input_method_name_uk"
+        android:imeSubtypeLocale="uk_UA"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="noSuggestions=true" />
 </input-method>
 
