@@ -1,17 +1,19 @@
 #!/bin/bash
 
 echo "========================================"
-echo "Compilazione e installazione Pastiera"
+echo "Building and installing Pastiera"
 echo "========================================"
 echo ""
 
 # Set JAVA_HOME to Android Studio's JDK
-export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+export JAVA_HOME="$HOME/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+
+ls -la "$JAVA_HOME"
 
 # Check if JAVA_HOME is valid
 if [ ! -f "$JAVA_HOME/bin/java" ]; then
-    echo "ERRORE: Java non trovato in $JAVA_HOME"
-    echo "Verifica che Android Studio sia installato."
+    echo "ERROR: Java not found at $JAVA_HOME"
+    echo "Make sure Android Studio is installed."
     exit 1
 fi
 
@@ -31,30 +33,30 @@ if [ -z "$ADB_PATH" ]; then
 fi
 
 if [ -z "$ADB_PATH" ] || [ ! -f "$ADB_PATH" ]; then
-    echo "ERRORE: ADB non trovato."
-    echo "Verifica che Android SDK sia installato e che platform-tools sia presente."
+    echo "ERROR: ADB not found."
+    echo "Make sure Android SDK is installed and platform-tools is present."
     exit 1
 fi
 
 # Check if device is connected
-echo "Verifica dispositivo connesso..."
+echo "Checking for connected device..."
 DEVICE_COUNT=$("$ADB_PATH" devices | grep -v "List" | grep "device$" | wc -l | tr -d ' ')
 if [ "$DEVICE_COUNT" -eq 0 ]; then
-    echo "ATTENZIONE: Nessun dispositivo Android connesso."
-    echo "Collega un dispositivo o avvia un emulatore prima di continuare."
+    echo "WARNING: No Android device connected."
+    echo "Connect a device or start an emulator before continuing."
     echo ""
-    echo "Compilazione dell'APK..."
+    echo "Building APK..."
     ./gradlew assembleDebug
     if [ $? -eq 0 ]; then
         echo ""
         echo "========================================"
-        echo "APK compilato con successo!"
+        echo "APK built successfully!"
         echo "========================================"
-        echo "APK disponibile in: app/build/outputs/apk/debug/app-debug.apk"
+        echo "APK available at: app/build/outputs/apk/debug/app-debug.apk"
         exit 0
     else
         echo ""
-        echo "ERRORE: La compilazione non è riuscita."
+        echo "ERROR: Build failed."
         exit 1
     fi
 fi
@@ -66,28 +68,28 @@ fi
 if [ $? -eq 0 ]; then
     echo ""
     echo "========================================"
-    echo "Installazione completata con successo!"
+    echo "Installation completed successfully!"
     echo "========================================"
     echo ""
-    echo "Avvio dell'app sul dispositivo..."
+    echo "Launching the app on device..."
     
     # Launch the app on Android device
     "$ADB_PATH" shell am start -n it.palsoftware.pastiera/.MainActivity
     
     if [ $? -eq 0 ]; then
         echo ""
-        echo "App avviata con successo!"
+        echo "App launched successfully!"
         exit 0
     else
         echo ""
-        echo "ERRORE: Impossibile avviare l'app."
-        echo "Verifica che il dispositivo sia connesso e che ADB sia configurato correttamente."
+        echo "ERROR: Failed to launch the app."
+        echo "Make sure the device is connected and ADB is configured correctly."
         exit 1
     fi
 else
     echo ""
-    echo "ERRORE: La compilazione/installazione non è riuscita."
-    echo "Verifica gli errori sopra."
+    echo "ERROR: Build/installation failed."
+    echo "Check the errors above."
     exit 1
 fi
 
